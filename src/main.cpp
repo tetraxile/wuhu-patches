@@ -27,10 +27,10 @@ HkTrampoline<void, GameSystem*> drawMainHook = hk::hook::trampoline([](GameSyste
     hk::gfx::DebugRenderer::instance()->begin(drawContext->getCommandBuffer()->ToData()->pNvnCommandBuffer);
     /// hk::gfx::DebugRenderer::instance()->drawTest();
     hk::gfx::DebugRenderer::instance()->drawQuad(
-        { { 0.0, 0.0 }, { 0, 0 }, 0xFF0000FF },
-        { { 0.5, 0.0 }, { 1.0, 0 }, 0xFF00FF00 },
-        { { 0.5, 1.0 }, { 1.0, 1.0 }, 0xFFFFFF00 },
-        { { 0.0, 1.0 }, { 0, 1.0 }, 0xFFFF0000 });
+        { { 0.0, 0.0 }, { 0, 0 }, 0xffffffff },
+        { { 0.5, 0.0 }, { 1.0, 0 }, 0xffffffff },
+        { { 0.5, 1.0 }, { 1.0, 1.0 }, 0xffffffff },
+        { { 0.0, 1.0 }, { 0, 1.0 }, 0xffffffff });
     /*hk::gfx::DebugRenderer::instance()->drawTri(
         { { 0.5, 0.0 }, { 0, 0 }, 0xFF00FF00 },
         { { 1.0, 0.0 }, { 0, 0 }, 0x550000FF },
