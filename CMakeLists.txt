@@ -13,6 +13,7 @@ set(SOURCES ${SOURCES_ASM} ${SOURCES_C} ${SOURCES_CXX})
 add_executable(${PROJECT_NAME} ${SOURCES})
 include_directories(include/sead)
 include_directories(include/al)
+include_directories(include/game)
 
 include(sys/cmake/module.cmake)
 include(sys/cmake/deploy.cmake)
