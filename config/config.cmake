@@ -5,8 +5,7 @@ set(OPTIMIZE_OPTIONS_DEBUG -O2 -gdwarf-4)
 set(OPTIMIZE_OPTIONS_RELEASE -O3 -ffast-math -flto)
 set(WARN_OPTIONS -Werror=return-type)
 
-set(DEFINITIONS "")
-set(INCLUDES include)
+set(INCLUDES include include/agl)
 
 set(ASM_OPTIONS "")
 set(C_OPTIONS -ffunction-sections -fdata-sections)
@@ -23,3 +22,5 @@ set(USE_SAIL TRUE)
 
 set(TRAMPOLINE_POOL_SIZE 0x10)
 set(BAKE_SYMBOLS FALSE)
+
+set(HAKKUN_ADDONS DebugRenderer)
