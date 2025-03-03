@@ -23,4 +23,4 @@ set(USE_SAIL TRUE)
 set(TRAMPOLINE_POOL_SIZE 0x10)
 set(BAKE_SYMBOLS FALSE)
 
-set(HAKKUN_ADDONS DebugRenderer)
+set(HAKKUN_ADDONS Nvn DebugRenderer)
