@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 include_directories(include/sead)
 include_directories(include/al)
 include_directories(include/game)
+include_directories(lib/imgui)
 
 include(sys/cmake/module.cmake)
 include(sys/cmake/deploy.cmake)

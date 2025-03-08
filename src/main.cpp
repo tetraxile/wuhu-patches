@@ -1,4 +1,5 @@
 #include "hk/gfx/DebugRenderer.h"
+#include "hk/gfx/ImGuiBackendNvn.h"
 #include "hk/hook/Trampoline.h"
 
 #include "agl/common/aglDrawContext.h"
@@ -12,9 +13,38 @@
 #include "al/Library/LiveActor/ActorPoseUtil.h"
 #include "al/Library/LiveActor/LiveActor.h"
 #include "al/Library/LiveActor/LiveActorKit.h"
+#include "al/Library/Memory/HeapUtil.h"
 #include "al/Library/Player/PlayerHolder.h"
 #include "al/Library/Scene/Scene.h"
 #include "al/Library/System/GameSystemInfo.h"
+
+#include <sead/heap/seadExpHeap.h>
+#include <utility>
+
+#include "nn/hid.h"
+
+#include "imgui.h"
+
+static sead::Heap* sImGuiHeap = nullptr;
+
+HkTrampoline<void, GameSystem*> gameSystemInit = hk::hook::trampoline([](GameSystem* gameSystem) -> void {
+    sImGuiHeap = sead::ExpHeap::create(2_MB, "ImGuiHeap", al::getStationedHeap(), 8, sead::Heap::cHeapDirection_Forward, false);
+
+    gameSystemInit.orig(gameSystem);
+
+    auto* imgui = hk::gfx::ImGuiBackendNvn::instance();
+
+    imgui->setAllocator(
+        { [](size allocSize, size alignment) -> void* {
+             return sImGuiHeap->tryAlloc(allocSize, alignment);
+         },
+            [](void* ptr) -> void {
+                sImGuiHeap->free(ptr);
+            } });
+    imgui->tryInitialize();
+
+    nn::hid::InitializeMouse();
+});
 
 HkTrampoline<void, al::LiveActor*> marioControl = hk::hook::trampoline([](al::LiveActor* player) -> void {
     if (al::isPadHoldA(-1)) {
@@ -24,6 +54,34 @@ HkTrampoline<void, al::LiveActor*> marioControl = hk::hook::trampoline([](al::Li
 
     marioControl.orig(player);
 });
+
+static void updateImGuiInput() {
+    static nn::hid::MouseState state;
+    static nn::hid::MouseState lastState;
+
+    lastState = state;
+    nn::hid::GetMouseState(&state);
+
+    auto& io = ImGui::GetIO();
+    io.AddMousePosEvent(state.x / 1280.f * io.DisplaySize.x, state.y / 720.f * io.DisplaySize.y);
+    constexpr std::pair<nn::hid::MouseButton, ImGuiMouseButton> buttonMap[] = {
+        { nn::hid::MouseButton::Left, ImGuiMouseButton_Left },
+        { nn::hid::MouseButton::Right, ImGuiMouseButton_Right },
+        { nn::hid::MouseButton::Middle, ImGuiMouseButton_Middle },
+    };
+
+    for (const auto& [hidButton, imguiButton] : buttonMap) {
+        if (state.buttons.Test(int(hidButton)) && !lastState.buttons.Test(int(hidButton))) {
+            io.AddMouseButtonEvent(imguiButton, true);
+        } else if (!state.buttons.Test(int(hidButton)) && lastState.buttons.Test(int(hidButton))) {
+            io.AddMouseButtonEvent(imguiButton, false);
+        }
+    }
+
+    io.AddMouseWheelEvent(state.wheelDeltaX, state.wheelDeltaY);
+
+    io.MouseDrawCursor = true;
+}
 
 HkTrampoline<void, GameSystem*> drawMainHook = hk::hook::trampoline([](GameSystem* gameSystem) -> void {
     drawMainHook.orig(gameSystem);
@@ -40,6 +98,14 @@ HkTrampoline<void, GameSystem*> drawMainHook = hk::hook::trampoline([](GameSyste
         player = scene->mLiveActorKit->mPlayerHolder->tryGetPlayer(0);
 
     auto* renderer = hk::gfx::DebugRenderer::instance();
+
+    updateImGuiInput();
+
+    ImGui::NewFrame();
+    ImGui::ShowDemoWindow();
+    ImGui::Render();
+
+    hk::gfx::ImGuiBackendNvn::instance()->draw(ImGui::GetDrawData(), drawContext->getCommandBuffer()->ToData()->pNvnCommandBuffer);
 
     renderer->clear();
     renderer->begin(drawContext->getCommandBuffer()->ToData()->pNvnCommandBuffer);
@@ -68,5 +134,8 @@ HkTrampoline<void, GameSystem*> drawMainHook = hk::hook::trampoline([](GameSyste
 extern "C" void hkMain() {
     marioControl.installAtSym<"_ZN19PlayerActorHakoniwa7controlEv">();
     drawMainHook.installAtSym<"_ZN10GameSystem8drawMainEv">();
+    gameSystemInit.installAtSym<"_ZN10GameSystem4initEv">();
+
     hk::gfx::DebugRenderer::instance()->installHooks();
+    hk::gfx::ImGuiBackendNvn::instance()->installHooks(false);
 }
