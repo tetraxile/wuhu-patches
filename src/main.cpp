@@ -80,6 +80,8 @@ static void updateImGuiInput() {
 
     io.AddMouseWheelEvent(state.wheelDeltaX, state.wheelDeltaY);
 
+    /* Keyboard missing */
+
     io.MouseDrawCursor = true;
 }
 
@@ -97,7 +99,7 @@ HkTrampoline<void, GameSystem*> drawMainHook = hk::hook::trampoline([](GameSyste
     if (scene && scene->mLiveActorKit && scene->mLiveActorKit->mPlayerHolder)
         player = scene->mLiveActorKit->mPlayerHolder->tryGetPlayer(0);
 
-    auto* renderer = hk::gfx::DebugRenderer::instance();
+    /* ImGui */
 
     updateImGuiInput();
 
@@ -106,6 +108,10 @@ HkTrampoline<void, GameSystem*> drawMainHook = hk::hook::trampoline([](GameSyste
     ImGui::Render();
 
     hk::gfx::ImGuiBackendNvn::instance()->draw(ImGui::GetDrawData(), drawContext->getCommandBuffer()->ToData()->pNvnCommandBuffer);
+
+    /* DebugRenderer */
+
+    auto* renderer = hk::gfx::DebugRenderer::instance();
 
     renderer->clear();
     renderer->begin(drawContext->getCommandBuffer()->ToData()->pNvnCommandBuffer);
