@@ -12,20 +12,11 @@
 #include "al/Library/LiveActor/ActorPoseUtil.h"
 #include "al/Library/LiveActor/LiveActor.h"
 #include "al/Library/LiveActor/LiveActorKit.h"
-#include "al/Library/Memory/HeapUtil.h"
 #include "al/Library/Player/PlayerHolder.h"
 #include "al/Library/Scene/Scene.h"
 #include "al/Library/System/GameSystemInfo.h"
 
 #include <sead/heap/seadExpHeap.h>
-
-static sead::Heap* sImGuiHeap = nullptr;
-
-HkTrampoline<void, GameSystem*> gameSystemInit = hk::hook::trampoline([](GameSystem* gameSystem) -> void {
-    sImGuiHeap = sead::ExpHeap::create(2_MB, "ImGuiHeap", al::getStationedHeap(), 8, sead::Heap::cHeapDirection_Forward, false);
-
-    gameSystemInit.orig(gameSystem);
-});
 
 HkTrampoline<void, al::LiveActor*> marioControl = hk::hook::trampoline([](al::LiveActor* player) -> void {
     if (al::isPadHoldA(-1)) {
@@ -81,7 +72,6 @@ HkTrampoline<void, GameSystem*> drawMainHook = hk::hook::trampoline([](GameSyste
 extern "C" void hkMain() {
     marioControl.installAtSym<"_ZN19PlayerActorHakoniwa7controlEv">();
     drawMainHook.installAtSym<"_ZN10GameSystem8drawMainEv">();
-    gameSystemInit.installAtSym<"_ZN10GameSystem4initEv">();
 
     hk::gfx::DebugRenderer::instance()->installHooks();
 }
