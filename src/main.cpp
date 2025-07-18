@@ -1,3 +1,4 @@
+#include "hk/diag/diag.h"
 #include "hk/gfx/DebugRenderer.h"
 #include "hk/hook/Trampoline.h"
 
@@ -17,6 +18,12 @@
 #include "al/Library/System/GameSystemInfo.h"
 
 #include <sead/heap/seadExpHeap.h>
+#include <sead/heap/seadHeapMgr.h>
+
+#include "hk/ro/RoUtil.h"
+#include "hk/util/Context.h"
+#include "nn/fs.h"
+#include "pe/Hacks/FSHacks.h"
 
 HkTrampoline<void, al::LiveActor*> marioControl = hk::hook::trampoline([](al::LiveActor* player) -> void {
     if (al::isPadHoldA(-1)) {
@@ -69,9 +76,18 @@ HkTrampoline<void, GameSystem*> drawMainHook = hk::hook::trampoline([](GameSyste
     renderer->end();
 });
 
+static void initHeap() {
+    nn::fs::MountSdCardForDebug("sd");
+
+    pe::applyRomFSPatches(sead::HeapMgr::getRootHeap(0));
+}
+
 extern "C" void hkMain() {
+    hk::hook::writeBranchAtSym<"$heap_create_hook">(initHeap);
     marioControl.installAtSym<"_ZN19PlayerActorHakoniwa7controlEv">();
     drawMainHook.installAtSym<"_ZN10GameSystem8drawMainEv">();
+
+    pe::installFSHacks();
 
     hk::gfx::DebugRenderer::instance()->installHooks();
 }

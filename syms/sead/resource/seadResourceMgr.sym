@@ -1,0 +1,9 @@
+@smo:100,101,110,120
+
+_ZN4sead11ResourceMgr20tryLoadWithoutDecompERKNS0_7LoadArgE
+_ZN4sead11ResourceMgr7tryLoadERKNS0_7LoadArgERKNS_14SafeStringBaseIcEEPNS_12DecompressorE
+
+@smo:130
+
+_ZN4sead11ResourceMgr20tryLoadWithoutDecompERKNS0_7LoadArgE = 0x0095ed60
+_ZN4sead11ResourceMgr7tryLoadERKNS0_7LoadArgERKNS_14SafeStringBaseIcEEPNS_12DecompressorE = 0x0095f160

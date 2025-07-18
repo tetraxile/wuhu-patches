@@ -1,0 +1,8 @@
+@smo:100,101,110,120
+
+$heap_create_func = "_ZN4sead13GameFramework10initializeERKNS_9Framework13InitializeArgE"
+$heap_create_hook = $heap_create_func + 0x1c4
+
+@smo:130
+
+$heap_create_hook = 0x00943884
