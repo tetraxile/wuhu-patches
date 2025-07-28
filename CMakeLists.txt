@@ -15,6 +15,7 @@ include_directories(include/sead)
 include_directories(include/al)
 include_directories(include/game)
 include_directories(lib/imgui)
+include_directories(src)
 
 include(sys/cmake/module.cmake)
 include(sys/cmake/deploy.cmake)

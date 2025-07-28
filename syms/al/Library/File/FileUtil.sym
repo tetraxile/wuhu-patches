@@ -1,0 +1,13 @@
+@smo:100,101,110,120
+
+_ZN2al18loadArchiveWithExtERKN4sead14SafeStringBaseIcEEPKc
+_ZN2al11loadArchiveERKN4sead14SafeStringBaseIcEE
+_ZN2al17calcFileAlignmentERKN4sead14SafeStringBaseIcEE
+_ZN2al23calcBufferSizeAlignmentERKN4sead14SafeStringBaseIcEE
+
+@smo:130
+
+_ZN2al18loadArchiveWithExtERKN4sead14SafeStringBaseIcEEPKc = 0x00615430
+_ZN2al11loadArchiveERKN4sead14SafeStringBaseIcEE = 0x006153c0
+_ZN2al17calcFileAlignmentERKN4sead14SafeStringBaseIcEE = 0x006152e0
+_ZN2al23calcBufferSizeAlignmentERKN4sead14SafeStringBaseIcEE = 0x00615350

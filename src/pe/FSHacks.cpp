@@ -4,22 +4,59 @@
 #include "heap/seadHeapMgr.h"
 #include "hk/Result.h"
 #include "hk/diag/diag.h"
+#include "hk/hook/InstrUtil.h"
 #include "hk/hook/Trampoline.h"
+#include "hk/hook/a64/Assembler.h"
 #include "hk/ro/RoUtil.h"
+#include "hk/svc/types.h"
+#include "hk/util/Algorithm.h"
+#include "hk/util/Context.h"
+#include "hk/util/FixedCapacityArray.h"
 #include "hk/util/hash.h"
-#include "nn/fs.h"
+#include <cstdio>
 #include <sead/prim/seadEndian.h>
 #include <sead/resource/seadResourceMgr.h>
 
+#include "libnx/ncm_types.h"
+#include "libnx/pm.h"
+#include "nn/fs.h"
+
+#include "al/Library/Base/StringUtil.h"
+#include "al/Library/File/FileUtil.h"
+#include <sead/resource/seadArchiveRes.h>
+
+#include "libnx/service.h"
+
 static sead::ExpHeap* sPatchHeap = nullptr;
+
+namespace nn {
+
+    namespace svc {
+        struct Handle {
+            hk::svc::Handle _0;
+        };
+    } // namespace svc
+
+    namespace sm {
+        hk::Result GetServiceHandle(nn::svc::Handle* out, const char* name, u64);
+    } // namespace sm
+
+} // namespace nn
+
+extern "C" Service g_pmshellSrv;
 
 namespace pe {
 
     static hk_noinline bool isFileExist(const char* path) {
         nn::fs::DirectoryEntryType type;
-        nn::fs::GetEntryType(&type, path);
 
-        return type == nn::fs::DirectoryEntryType_File;
+        return nn::fs::GetEntryType(&type, path).IsSuccess() && type == nn::fs::DirectoryEntryType_File;
+        /*nn::fs::FileHandle handle;
+        if (nn::fs::OpenFile(&handle, path, nn::fs::OpenMode_Read).IsSuccess()) {
+            nn::fs::CloseFile(handle);
+            return true;
+        }
+        return false;*/
     }
 
     hk::Result writeFileToPath(void* buf, size_t size, const char* path) {
@@ -50,7 +87,7 @@ namespace pe {
     constexpr char cBaseRomFsMount[] = ROMFS_MOUNT;
     constexpr char cBaseRomFsDir[] = ROMFS_MOUNT "/";
     constexpr char cCacheDir[] = CACHE_DIR;
-    constexpr char cCacheHashFile[] = CACHE_DIR "patch.hash";
+    constexpr char cCacheHashFile[] = CACHE_DIR "patch.meta";
     constexpr bool cIsZstd = COMPRESSION;
     constexpr char cCompressionExt[] =
 #if COMPRESSION == YAZ0
@@ -61,6 +98,25 @@ namespace pe {
         ;
 
     static PathStr sVersionExt("");
+
+    struct FileAlignmentEntry {
+        u32 nameHash;
+        int alignment;
+    };
+
+    constexpr size cMaxPatches = 0x1000;
+
+    static hk::util::FixedCapacityArray<FileAlignmentEntry, cMaxPatches> sFileAlignmentTable;
+
+    struct PatchingProgress {
+        u32 numPatched = 0;
+        u32 numTotal = 0;
+        char curFile[0x100] { '\0' };
+        char gameVersion[9] { '\0' };
+    };
+
+    static PatchingProgress sProgress;
+    static int sNumBpsPatches = 0;
 
 }
 
@@ -84,7 +140,7 @@ namespace pe {
             return openFileHook.orig(out, filePath, mode);
         });
 
-    HkTrampoline<sead::Resource*, sead::ResourceMgr*, const sead::ResourceMgr::LoadArg&,
+    /*HkTrampoline<sead::Resource*, sead::ResourceMgr*, const sead::ResourceMgr::LoadArg&,
 #if not SEAD_RESOURCEMGR_TRYCREATE_NO_FACTORY_NAME
         const sead::SafeString&,
 #endif
@@ -105,6 +161,7 @@ namespace pe {
                 }();
 
                 if (cacheExists) {
+                    hk::diag::debugLog("Load cached %s %s", arg.path.cstr(), decompressedPath.cstr());
                     auto decompressedArg = arg;
                     decompressedArg.path = decompressedPath;
                     return thisPtr->tryLoadWithoutDecomp(decompressedArg);
@@ -115,10 +172,56 @@ namespace pe {
                 factory_name,
 #endif
                 decompressor);
-        });
+        });*/
+
+    static sead::ArchiveRes* loadArchiveHook(const sead::SafeString& path) {
+        const auto origPath = al::StringTmp<256>("content:/%s.sarc", path.cstr());
+        const auto cachePath = al::StringTmp<256>(CACHE_DIR "%s.sarc", path.cstr());
+        if (
+            isFileExist(origPath.cstr())
+            or isFileExist(cachePath.cstr())) {
+            return al::loadArchiveWithExt(path, "sarc");
+        } else
+            return al::loadArchive(path);
+    }
+
+    static int getPatchedSarcAligment(const sead::SafeString& path) {
+        const u32 hash = hk::util::hashMurmur(path.cstr());
+        int index = hk::util::binarySearch([](int index) -> u32 {
+            return sFileAlignmentTable[index].nameHash;
+        },
+            0, sFileAlignmentTable.size() - 1, hash);
+
+        if (index != -1) {
+            const auto& entry = sFileAlignmentTable[index];
+            return entry.alignment;
+        }
+
+        return -1;
+    }
+
+    HkTrampoline<int, const sead::SafeString&> calcFileAlignmentHook = hk::hook::trampoline([](const sead::SafeString& path) -> int {
+        int alignment = getPatchedSarcAligment(path);
+        if (alignment != -1)
+            return alignment;
+
+        return calcFileAlignmentHook.orig(path);
+    });
+
+    HkTrampoline<int, const sead::SafeString&> calcBufferSizeAlignmentHook = hk::hook::trampoline([](const sead::SafeString& path) -> int {
+        int alignment = getPatchedSarcAligment(path);
+        if (alignment != -1)
+            return alignment;
+
+        return calcBufferSizeAlignmentHook.orig(path);
+    });
 
     void installFSHacks() {
-        loadResourceHook.installAtPtr(pun<void*>(&sead::ResourceMgr::tryLoad));
+        // loadResourceHook.installAtPtr(pun<void*>(&sead::ResourceMgr::tryLoad));
+        // HK_ABORT("die %p", hk::util::lookupSymbol<"$resource_load_archive_hook">());
+        hk::hook::writeBranchLinkAtSym<"$resource_load_archive_hook">(loadArchiveHook);
+        calcFileAlignmentHook.installAtPtr(al::calcFileAlignment);
+        calcBufferSizeAlignmentHook.installAtPtr(al::calcBufferSizeAlignment);
     }
 
     static mem patchFileData(mem patch, mem source, const char* bpsPath) {
@@ -132,17 +235,17 @@ namespace pe {
         HK_ABORT_UNLESS(isFileExist(originalPath), "Patch %s exists, but source file %s does not!", bpsPath, originalPath);
 
         nn::fs::FileHandle patchFile;
-        HK_ASSERT(nn::fs::OpenFile(&patchFile, bpsPath, nn::fs::OpenMode_Read).IsSuccess());
+        HK_ABORT_UNLESS_R(nn::fs::OpenFile(&patchFile, bpsPath, nn::fs::OpenMode_Read).GetInnerValueForDebug());
         s64 patchSize = 0;
-        HK_ASSERT(nn::fs::GetFileSize(&patchSize, patchFile).IsSuccess());
+        HK_ABORT_UNLESS_R(nn::fs::GetFileSize(&patchSize, patchFile).GetInnerValueForDebug());
         u8* patchData = (u8*)sPatchHeap->alloc(patchSize);
         nn::fs::ReadFile(patchFile, 0, patchData, patchSize);
         nn::fs::CloseFile(patchFile);
 
         nn::fs::FileHandle sourceFile;
-        HK_ASSERT(nn::fs::OpenFile(&sourceFile, originalPath, nn::fs::OpenMode_Read).IsSuccess());
+        HK_ABORT_UNLESS_R(nn::fs::OpenFile(&sourceFile, originalPath, nn::fs::OpenMode_Read).GetInnerValueForDebug());
         s64 sourceSize = 0;
-        HK_ASSERT(nn::fs::GetFileSize(&sourceSize, sourceFile).IsSuccess());
+        HK_ABORT_UNLESS_R(nn::fs::GetFileSize(&sourceSize, sourceFile).GetInnerValueForDebug());
         u8* sourceData = (u8*)sPatchHeap->alloc(sourceSize);
         nn::fs::ReadFile(sourceFile, 0, sourceData, sourceSize);
         nn::fs::CloseFile(sourceFile);
@@ -168,11 +271,18 @@ namespace pe {
             struct header {
                 u8 magic[4];
                 u32 decompressedSize;
+                u32 bufferAlignment;
             }* header(reinterpret_cast<struct header*>(sourceData));
 
             u32 decompressedSize = sead::Endian::swapU32(header->decompressedSize);
+            u32 bufferAlignment = sead::Endian::swapU32(header->bufferAlignment);
             u8* decompressedData = (u8*)sPatchHeap->alloc(decompressedSize);
             HK_ABORT_UNLESS(decodeSZSNxAsm64_(decompressedData, sourceData) >= 0, "SZS decompression failed for %s", originalPath);
+
+            PathStr* normalPath = new PathStr(outPath);
+            normalPath->replaceString(cCacheDir, "");
+            sFileAlignmentTable.add({ hk::util::hashMurmur(normalPath->cstr()), int(bufferAlignment) });
+            delete normalPath;
 
             sPatchHeap->free(sourceData);
             sourceData = decompressedData;
@@ -234,10 +344,10 @@ namespace pe {
             nn::fs::DirectoryEntry& entry = entries[i];
             PathStrFormat* entryPath = new PathStrFormat("%s/%s", walkPath, entry.mName);
 
-            if (entry.mType == nn::fs::DirectoryEntryType_File) {
+            if (entry.mTypeByte == nn::fs::DirectoryEntryType_File) {
                 if (entryPath->endsWith(".bps") or entryPath->endsWith(sVersionExt))
                     func(*entryPath);
-            } else if (entry.mType == nn::fs::DirectoryEntryType_Directory)
+            } else if (entry.mTypeByte == nn::fs::DirectoryEntryType_Directory)
                 iterateBpsPatches(rootWalkPath, entryPath->cstr(), func);
 
             delete entryPath;
@@ -250,7 +360,10 @@ namespace pe {
     }
 
     static void patchDirRecursive(const char* rootWalkPath, const char* walkPath) {
+        int curIdx = 0;
         iterateBpsPatches(rootWalkPath, walkPath, [&](const PathStr& path) -> void {
+            curIdx++;
+
             PathStr* rawPath = new PathStr(path);
             rawPath->removeSuffix(".bps");
             rawPath->removeSuffix(sVersionExt);
@@ -260,7 +373,18 @@ namespace pe {
 
             PathStrFormat* outPath = new PathStrFormat(cCacheDir);
             outPath->append(rawPath->cstr() + 1);
-            outPath->removeSuffix(cCompressionExt);
+
+            sProgress.numPatched = curIdx;
+            sProgress.numTotal = sNumBpsPatches;
+            strncpy(sProgress.curFile, rawPath->cstr() + 1, sizeof(sProgress.curFile));
+
+            if constexpr (true) { // al
+                if (outPath->endsWith(cCompressionExt)) {
+                    outPath->removeSuffix(cCompressionExt);
+                    outPath->append(".sarc");
+                }
+            } else // normal
+                outPath->removeSuffix(cCompressionExt);
 
             hk::diag::debugLog("Patching %s with %s to %s", originalPath->cstr(), path.cstr(), outPath->cstr());
             createDirectoryRecursively(getParentPath(outPath->cstr()).cstr());
@@ -273,20 +397,59 @@ namespace pe {
     }
 
     static void writePatchesHash(u32 hash) {
-        writeFileToPath(&hash, sizeof(hash), cCacheHashFile);
+        sFileAlignmentTable.sort([](const FileAlignmentEntry& a, const FileAlignmentEntry& b) -> bool {
+            return a.nameHash < b.nameHash;
+        });
+
+        if (isFileExist(cCacheHashFile)) {
+            HK_ABORT_UNLESS_R(nn::fs::DeleteFile(cCacheHashFile).GetInnerValueForDebug());
+        }
+
+        const u32 tableSize = sFileAlignmentTable.size();
+
+        HK_ABORT_UNLESS_R(nn::fs::CreateFile(cCacheHashFile, sizeof(hash) + sizeof(tableSize) + tableSize * sizeof(FileAlignmentEntry)).GetInnerValueForDebug());
+
+        nn::fs::FileHandle handle;
+        HK_ABORT_UNLESS_R(nn::fs::OpenFile(&handle, cCacheHashFile, nn::fs::OpenMode_Write).GetInnerValueForDebug());
+        HK_ABORT_UNLESS_R(nn::fs::WriteFile(handle, 0, &hash, sizeof(hash), {}).GetInnerValueForDebug());
+        HK_ABORT_UNLESS_R(nn::fs::WriteFile(handle, sizeof(hash), &tableSize, sizeof(tableSize), {}).GetInnerValueForDebug());
+        for (u32 i = 0; i < tableSize; i++) {
+            const auto& entry = sFileAlignmentTable[i];
+            HK_ABORT_UNLESS_R(nn::fs::WriteFile(handle, sizeof(hash) + sizeof(tableSize) + sizeof(entry) * i, &entry, sizeof(entry), nn::fs::WriteOption::CreateOption(nn::fs::WriteOptionFlag_Flush)).GetInnerValueForDebug());
+        }
+        nn::fs::CloseFile(handle);
     }
 
     static u32 readPatchesHash() {
         if (!isFileExist(cCacheHashFile))
             return 0;
         nn::fs::FileHandle hashFile;
-        HK_ASSERT(nn::fs::OpenFile(&hashFile, cCacheHashFile, nn::fs::OpenMode_Read).IsSuccess());
+        HK_ABORT_UNLESS_R(nn::fs::OpenFile(&hashFile, cCacheHashFile, nn::fs::OpenMode_Read).GetInnerValueForDebug());
         s64 size = 0;
-        HK_ASSERT(nn::fs::GetFileSize(&size, hashFile).IsSuccess());
-        if (size != sizeof(u32))
+        HK_ABORT_UNLESS_R(nn::fs::GetFileSize(&size, hashFile).GetInnerValueForDebug());
+        if (size < sizeof(u32) * 2) {
+            hk::diag::debugLog("Patch hash file size too small: %zu", size);
+            nn::fs::CloseFile(hashFile);
             return 0;
+        }
         u32 hash = 0;
-        nn::fs::ReadFile(hashFile, 0, &hash, sizeof(hash));
+        HK_ABORT_UNLESS_R(nn::fs::ReadFile(hashFile, 0, &hash, sizeof(hash)).GetInnerValueForDebug());
+        u32 tableSize = 0;
+        HK_ABORT_UNLESS_R(nn::fs::ReadFile(hashFile, sizeof(hash), &tableSize, sizeof(tableSize)).GetInnerValueForDebug());
+
+        const u32 expectedSize = sizeof(u32) * 2 + tableSize * sizeof(FileAlignmentEntry);
+        if (size != expectedSize) {
+            hk::diag::debugLog("Patch hash file size mismatch: expected %zu, got %zu", expectedSize, size);
+            nn::fs::CloseFile(hashFile);
+            return 0;
+        }
+
+        for (u32 i = 0; i < tableSize; i++) {
+            FileAlignmentEntry entry;
+            HK_ABORT_UNLESS_R(nn::fs::ReadFile(hashFile, sizeof(hash) + sizeof(tableSize) + sizeof(entry) * i, &entry, sizeof(entry)).GetInnerValueForDebug());
+            sFileAlignmentTable.add(entry);
+        }
+
         nn::fs::CloseFile(hashFile);
         return hash;
     }
@@ -305,12 +468,44 @@ namespace pe {
             nn::fs::CloseFile(patchFile);
 
             hash.feed(cast<const u8*>(&patchChecksum), sizeof(patchChecksum));
+            hash.feedNullTerminated(cast<const u8*>(path.cstr()));
             numPatches++;
         });
 
+        sNumBpsPatches = numPatches;
+
         hash.feed(cast<const u8*>(&numPatches), sizeof(numPatches));
+        const char* versionName = hk::ro::getMainModule()->getVersionName();
+        hash.feedNullTerminated(cast<const u8*>(versionName));
 
         return hash.finalize();
+    }
+
+    constexpr u64 cProgressBarProgram = 0x02008640FEDA0000;
+    static bool sProgressBarExists = true;
+
+    extern "C" void progressBarSetProgressPtrSignal(PatchingProgress*);
+
+    static void initProgressBar() {
+        hk::svc::Handle serviceHandle;
+        HK_ABORT_UNLESS_R(nn::sm::GetServiceHandle(cast<nn::svc::Handle*>(&serviceHandle), "pm:shell", 8));
+        serviceCreate(&g_pmshellSrv, serviceHandle);
+
+        const NcmProgramLocation location { cProgressBarProgram, 0 };
+        u64 pid = 0;
+        sProgressBarExists = pmshellLaunchProgram(PmLaunchFlag_None, &location, &pid).succeeded();
+        if (!sProgressBarExists)
+            return;
+
+        // let progress bar attach
+        nn::os::SleepThread(nn::TimeSpan::FromMilliSeconds(200));
+
+        __builtin_memcpy(sProgress.gameVersion, hk::ro::getMainModule()->getVersionName(), sizeof(sProgress.gameVersion));
+        progressBarSetProgressPtrSignal(&sProgress);
+    }
+
+    static void killProgressBar() {
+        HK_ABORT_UNLESS_R(pmshellTerminateProgram(cProgressBarProgram));
     }
 
     void applyRomFSPatches(sead::Heap* heap) {
@@ -336,10 +531,16 @@ namespace pe {
             hk::diag::debugLog("Cached Patches Hash: %08x", cachedPatchesHash);
             openFileHook.uninstall();
             if (needsPatch) {
+                initProgressBar();
+
+                sFileAlignmentTable.clear();
                 nn::fs::DeleteDirectoryRecursively(cCacheDir);
                 createDirectoryRecursively(cCacheDir);
                 patchDirRecursive(cBaseRomFsMount, cBaseRomFsMount);
                 writePatchesHash(patchesHash);
+
+                if (sProgressBarExists)
+                    killProgressBar();
             }
             openFileHook.installAtSym<"_ZN2nn2fs8OpenFileEPNS0_10FileHandleEPKci">();
         }
