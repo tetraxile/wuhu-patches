@@ -1,0 +1,9 @@
+@smo:100,101,110,120
+
+_ZN2al18invalidateClippingEPNS_9LiveActorE
+_ZN2al16validateClippingEPNS_9LiveActorE
+
+@smo:130
+
+_ZN2al18invalidateClippingEPNS_9LiveActorE = 0x0065ad20
+_ZN2al16validateClippingEPNS_9LiveActorE = 0x0065ad90

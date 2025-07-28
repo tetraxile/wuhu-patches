@@ -8,7 +8,7 @@ set(WARN_OPTIONS -Werror=return-type -Wno-invalid-offsetof)
 set(INCLUDES include include/agl)
 
 set(ASM_OPTIONS "")
-set(C_OPTIONS -ffunction-sections -fdata-sections)
+set(C_OPTIONS -ffunction-sections -fdata-sections -frtti)
 set(CXX_OPTIONS "")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)

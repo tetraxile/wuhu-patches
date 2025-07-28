@@ -1,0 +1,9 @@
+@smo:100,101,110,120
+
+_ZN2al11tryGetTransEPN4sead7Vector3IfEERKNS_13ActorInitInfoE
+_ZN2al12tryGetRotateEPN4sead7Vector3IfEERKNS_13ActorInitInfoE
+
+@smo:130
+
+_ZN2al11tryGetTransEPN4sead7Vector3IfEERKNS_13ActorInitInfoE = 0x0070ee90
+_ZN2al12tryGetRotateEPN4sead7Vector3IfEERKNS_13ActorInitInfoE = 0x0070f210

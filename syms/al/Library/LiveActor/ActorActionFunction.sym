@@ -1,0 +1,15 @@
+@smo:100,101,110,120
+
+_ZN2al11isActionEndEPKNS_9LiveActorE
+_ZN2al16startHitReactionEPKNS_9LiveActorEPKc
+_ZN2al11startActionEPNS_9LiveActorEPKc
+_ZN2al13restartActionEPNS_9LiveActorE
+_ZN2al10stopActionEPNS_9LiveActorE
+
+@smo:130
+
+_ZN2al11isActionEndEPKNS_9LiveActorE = 0x00656f40
+_ZN2al16startHitReactionEPKNS_9LiveActorEPKc = 0x006577d0
+_ZN2al11startActionEPNS_9LiveActorEPKc = 0x00656c30
+_ZN2al13restartActionEPNS_9LiveActorE = 0x00657490
+_ZN2al10stopActionEPNS_9LiveActorE = 0x00657390

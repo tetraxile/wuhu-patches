@@ -1,0 +1,9 @@
+@smo:100,101,110,120
+
+_ZN2al12isInWaterPosEPKNS_9LiveActorERKN4sead7Vector3IfEE
+_ZN2al17tryAddRippleLargeEPKNS_9LiveActorE
+
+@smo:130
+
+_ZN2al12isInWaterPosEPKNS_9LiveActorERKN4sead7Vector3IfEE = 0x006c58b0
+_ZN2al17tryAddRippleLargeEPKNS_9LiveActorE = 0x006c61f0
