@@ -174,16 +174,30 @@ namespace pe {
                 decompressor);
         });*/
 
-    static sead::ArchiveRes* loadArchiveHook(const sead::SafeString& path) {
+    extern "C" HkTrampoline<sead::ArchiveRes*, const sead::SafeString&> loadArchiveHook;
+    extern "C" HkTrampoline<sead::ArchiveRes*, const sead::SafeString&, const char*> loadArchiveWithExtHook;
+
+    HkTrampoline<sead::ArchiveRes*, const sead::SafeString&> loadArchiveHook = hk::hook::trampoline([](const sead::SafeString& path) -> sead::ArchiveRes* {
         const auto origPath = al::StringTmp<256>("content:/%s.sarc", path.cstr());
         const auto cachePath = al::StringTmp<256>(CACHE_DIR "%s.sarc", path.cstr());
         if (
             isFileExist(origPath.cstr())
             or isFileExist(cachePath.cstr())) {
-            return al::loadArchiveWithExt(path, "sarc");
+            return loadArchiveWithExtHook.orig(path, "sarc");
         } else
-            return al::loadArchive(path);
-    }
+            return loadArchiveHook.orig(path);
+    });
+
+    HkTrampoline<sead::ArchiveRes*, const sead::SafeString&, const char*> loadArchiveWithExtHook = hk::hook::trampoline([](const sead::SafeString& path, const char* ext) -> sead::ArchiveRes* {
+        const auto origPath = al::StringTmp<256>("content:/%s.sarc", path.cstr());
+        const auto cachePath = al::StringTmp<256>(CACHE_DIR "%s.sarc", path.cstr());
+        if (
+            isFileExist(origPath.cstr())
+            or isFileExist(cachePath.cstr())) {
+            return loadArchiveWithExtHook.orig(path, "sarc");
+        } else
+            return loadArchiveWithExtHook.orig(path, ext);
+    });
 
     static int getPatchedSarcAligment(const sead::SafeString& path) {
         const u32 hash = hk::util::hashMurmur(path.cstr());
@@ -219,7 +233,8 @@ namespace pe {
     void installFSHacks() {
         // loadResourceHook.installAtPtr(pun<void*>(&sead::ResourceMgr::tryLoad));
         // HK_ABORT("die %p", hk::util::lookupSymbol<"$resource_load_archive_hook">());
-        hk::hook::writeBranchLinkAtSym<"$resource_load_archive_hook">(loadArchiveHook);
+        loadArchiveHook.installAtPtr(al::loadArchive);
+        loadArchiveWithExtHook.installAtPtr(al::loadArchiveWithExt);
         calcFileAlignmentHook.installAtPtr(al::calcFileAlignment);
         calcBufferSizeAlignmentHook.installAtPtr(al::calcBufferSizeAlignment);
     }
