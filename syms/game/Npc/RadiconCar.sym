@@ -1,0 +1,49 @@
+@smo:100,101,110,120
+
+_ZN10RadiconCarC1EPP14IUsePlayerHack
+_ZN10RadiconCarC2EPP14IUsePlayerHack
+_ZN10RadiconCar4initERKN2al13ActorInitInfoE
+_ZN10RadiconCar18initAfterPlacementEv
+_ZN10RadiconCar14makeActorAliveEv
+_ZN10RadiconCar12attackSensorEPN2al9HitSensorES2_
+_ZN10RadiconCar10receiveMsgEPKN2al9SensorMsgEPNS0_9HitSensorES5_
+_ZNK10RadiconCar13tryCancelHackEv
+_ZTI10RadiconCar
+
+@smo:130
+
+_ZN10RadiconCarC1EPP14IUsePlayerHack = 0x00369a30
+_ZN10RadiconCarC2EPP14IUsePlayerHack = 0x00369a30
+_ZN10RadiconCar4initERKN2al13ActorInitInfoE = 0x00369b10
+_ZN10RadiconCar18initAfterPlacementEv = 0x00369c80
+_ZN10RadiconCar14makeActorAliveEv = 0x00369d00
+_ZN10RadiconCar12attackSensorEPN2al9HitSensorES2_ = 0x00369f10
+_ZN10RadiconCar10receiveMsgEPKN2al9SensorMsgEPNS0_9HitSensorES5_ = 0x00369fa0
+_ZNK10RadiconCar13tryCancelHackEv = 0x0036a3c0
+_ZTI10RadiconCar = 0x012a13d0
+
+
+@smo:100
+
+_ZN12_GLOBAL__N_17NrvWaitE = 0x01d657a0
+_ZN12_GLOBAL__N_111NrvMoveAutoE = 0x01d657a8
+
+// @smo:101
+// 
+// _ZN12_GLOBAL__N_17NrvWaitE =
+// _ZN12_GLOBAL__N_111NrvMoveAutoE =
+// 
+// @smo:110
+// 
+// _ZN12_GLOBAL__N_17NrvWaitE =
+// _ZN12_GLOBAL__N_111NrvMoveAutoE =
+// 
+// @smo:120
+// 
+// _ZN12_GLOBAL__N_17NrvWaitE =
+// _ZN12_GLOBAL__N_111NrvMoveAutoE =
+
+@smo:130
+
+_ZN12_GLOBAL__N_17NrvWaitE = 0x012a1628
+_ZN12_GLOBAL__N_111NrvMoveAutoE = 0x012a1630

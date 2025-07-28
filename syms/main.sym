@@ -1,0 +1,7 @@
+@smo:100
+
+$radicon_car_ctor_bl = 0x003bc71c
+
+@smo:130
+
+$radicon_car_ctor_bl = 0x0036b418

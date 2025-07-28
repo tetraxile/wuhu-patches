@@ -1,0 +1,9 @@
+@smo:100,101,110,120
+
+_ZN2al18validateHitSensorsEPNS_9LiveActorE
+_ZN2al20invalidateHitSensorsEPNS_9LiveActorE
+
+@smo:130
+
+_ZN2al18validateHitSensorsEPNS_9LiveActorE = 0x00670470
+_ZN2al20invalidateHitSensorsEPNS_9LiveActorE = 0x00670490
