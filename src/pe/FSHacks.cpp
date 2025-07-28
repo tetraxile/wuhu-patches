@@ -492,8 +492,9 @@ namespace pe {
         serviceCreate(&g_pmshellSrv, serviceHandle);
 
         const NcmProgramLocation location { cProgressBarProgram, 0 };
+
         u64 pid = 0;
-        sProgressBarExists = pmshellLaunchProgram(PmLaunchFlag_None, &location, &pid).succeeded();
+        sProgressBarExists = pmshellLaunchProgram(PmLaunchFlag_None, &location, &pid).succeeded() and pid != 0;
         if (!sProgressBarExists)
             return;
 
