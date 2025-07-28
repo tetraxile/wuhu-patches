@@ -25,4 +25,4 @@ set(USE_SAIL TRUE)
 set(TRAMPOLINE_POOL_SIZE 0x10)
 set(BAKE_SYMBOLS FALSE)
 
-set(HAKKUN_ADDONS LogManager Nvn DebugRenderer HeapSourceDynamic)
+set(HAKKUN_ADDONS LogManager HeapSourceDynamic)

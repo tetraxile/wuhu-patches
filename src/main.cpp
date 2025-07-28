@@ -1,4 +1,3 @@
-#include "hk/gfx/DebugRenderer.h"
 #include "hk/hook/InstrUtil.h"
 
 #include <nn/fs.h>
@@ -23,6 +22,5 @@ extern "C" void hkMain() {
 
     pe::installFSHacks();
 
-    hk::gfx::DebugRenderer::instance()->installHooks();
     hk::hook::writeBranchLinkAtSym<"$radicon_car_ctor_bl">(_ZN15RadiconCarPatchC1EPP14IUsePlayerHack);
 }
