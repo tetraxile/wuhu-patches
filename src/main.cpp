@@ -1,12 +1,14 @@
 #include "hk/hook/InstrUtil.h"
 
+#include <cstring>
 #include <nn/fs.h>
 
+#include <agl/common/aglDrawContext.h>
 #include <sead/heap/seadExpHeap.h>
 #include <sead/heap/seadHeapMgr.h>
-#include <sead/heap/seadExpHeap.h>
-#include <agl/common/aglDrawContext.h>
 
+#include "hk/types.h"
+#include "hk/util/hash.h"
 #include "pe/Hacks/FSHacks.h"
 
 extern "C" void _ZN15RadiconCarPatchC1EPP14IUsePlayerHack();
