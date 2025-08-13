@@ -1,4 +1,4 @@
-@rtld = nnrtld
+@rtld = 0
 @smo = RedStar.nss
 100 = 3ca12dfaaf9c82da064d1698df79cda1
 101 = 50ade4b5eb6e45efb170a6b230d3b0ba
