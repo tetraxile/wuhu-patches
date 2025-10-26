@@ -1,7 +1,7 @@
 set(LINKFLAGS -nodefaultlibs)
 set(LLDFLAGS --no-demangle --gc-sections)
 
-set(OPTIMIZE_OPTIONS_DEBUG -O2 -gdwarf-4)
+set(OPTIMIZE_OPTIONS_DEBUG -O0 -gdwarf-4)
 set(OPTIMIZE_OPTIONS_RELEASE -O3 -ffast-math -flto)
 set(WARN_OPTIONS -Werror=return-type -Wno-invalid-offsetof)
 
@@ -25,4 +25,4 @@ set(USE_SAIL TRUE)
 set(TRAMPOLINE_POOL_SIZE 0x10)
 set(BAKE_SYMBOLS FALSE)
 
-set(HAKKUN_ADDONS LogManager HeapSourceDynamic)
+set(HAKKUN_ADDONS HeapSourceDynamic)

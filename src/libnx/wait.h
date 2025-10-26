@@ -67,7 +67,7 @@ static inline void _waiterNodeAdd(WaiterNode* w) {
 }
 
 static inline void _waiterNodeRemove(WaiterNode* w) {
-    std::scoped_lock lock(w->parent->mutex);
+    auto lock(w->parent->mutex.lockScoped());
     w->node.prev->next = w->node.next;
     w->node.next->prev = w->node.prev;
 }

@@ -1,5 +1,6 @@
 @smo:100,101,110,120
 
+_ZN2al9LiveActorC2EPKc
 _ZN2al9LiveActor18initAfterPlacementEv
 _ZN2al9LiveActor6appearEv
 _ZN2al9LiveActor4killEv
@@ -28,6 +29,7 @@ _ZTIN2al9LiveActorE
 
 @smo:130
 
+_ZN2al9LiveActorC2EPKc = 0x0067f020
 _ZN2al9LiveActor18initAfterPlacementEv = 0x0067f230
 _ZN2al9LiveActor6appearEv = 0x0067f270
 _ZN2al9LiveActor4killEv = 0x0067f3e0

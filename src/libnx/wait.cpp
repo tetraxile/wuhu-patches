@@ -13,7 +13,7 @@ typedef hk::Result (*WaitImplFunc)(s32* idx_out, const void* objects, s32 num_ob
 static hk::Result _waitObjectsImpl(s32* idx_out, const Waiter* objects, u32 num_objects, u64 timeout) {
     HK_ASSERT(num_objects <= 0x40);
 
-    hk::svc::Handle own_thread_handle = hk::svc::getTLS()->nnsdk_thread_ptr->handle;
+    hk::svc::Handle own_thread_handle = hk::svc::getTLS()->nnsdkThread->handle;
     hk::svc::Handle dummy_handle = own_thread_handle;
     hk::Result rc;
 
@@ -142,5 +142,5 @@ hk::Result waitObjects(s32* idx_out, const Waiter* objects, s32 num_objects, u64
 }
 
 hk::Result waitHandles(s32* idx_out, const hk::svc::Handle* handles, s32 num_handles, u64 timeout) {
-    return _waitLoop(idx_out, handles, num_handles, timeout, (WaitImplFunc)hk::svc::WaitSynchronization);
+    return _waitLoop(idx_out, handles, num_handles, timeout, (WaitImplFunc)[](s32 * idx_out, const void* objects, s32 num_objects, u64 timeout)->hk::Result { return hk::svc::WaitSynchronization(idx_out, (const hk::Handle*)objects, num_objects, timeout); });
 }

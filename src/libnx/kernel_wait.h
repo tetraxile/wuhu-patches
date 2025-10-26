@@ -36,13 +36,15 @@ typedef enum
 // User-facing API starts here.
 
 /// Waiter structure, representing any generic waitable synchronization object; both kernel-mode and user-mode.
-typedef struct {
+typedef struct Waiter {
     WaiterType type;
 
     union {
         hk::svc::Handle handle;
         Waitable* waitable;
     };
+
+    Waiter() { }
 } Waiter;
 
 /// Creates a \ref Waiter for a kernel-mode \ref Handle.

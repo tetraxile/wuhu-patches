@@ -4,8 +4,8 @@
 #include <al/Library/LiveActor/ActorClippingFunction.h>
 #include <al/Library/LiveActor/ActorModelFunction.h>
 #include <al/Library/LiveActor/ActorMovementFunction.h>
-#include <al/Library/LiveActor/ActorSensorUtil.h>
 #include <al/Library/LiveActor/ActorPoseUtil.h>
+#include <al/Library/LiveActor/ActorSensorUtil.h>
 #include <al/Library/Nature/NatureUtil.h>
 #include <al/Library/Nerve/NerveSetupUtil.h>
 #include <al/Library/Nerve/NerveUtil.h>
@@ -14,19 +14,20 @@
 #include "game/Util/Hack.h"
 
 namespace {
-NERVE_IMPL(RadiconCar, Wait);
-NERVE_IMPL_(RadiconCar, MoveAuto, Move);
+    NERVE_IMPL(RadiconCar, Wait);
+    NERVE_IMPL_(RadiconCar, MoveAuto, Move);
 
-extern const RadiconCarNrvWait NrvWait;
-extern const RadiconCarNrvMoveAuto NrvMoveAuto;
+    extern const RadiconCarNrvWait NrvWait;
+    extern const RadiconCarNrvMoveAuto NrvMoveAuto;
 
-NERVE_IMPL(RadiconCarPatch, HackBreak);
-NERVE_IMPL(RadiconCarPatch, HackReset);
+    NERVE_IMPL(RadiconCarPatch, HackBreak);
+    NERVE_IMPL(RadiconCarPatch, HackReset);
 
-NERVES_MAKE_STRUCT(RadiconCarPatch, HackBreak, HackReset);
-}  // namespace
+    NERVES_MAKE_STRUCT(RadiconCarPatch, HackBreak, HackReset);
+} // namespace
 
-RadiconCarPatch::RadiconCarPatch(IUsePlayerHack** hackActor) : RadiconCar(hackActor) {}
+RadiconCarPatch::RadiconCarPatch(IUsePlayerHack** hackActor)
+    : RadiconCar(hackActor) { }
 
 void RadiconCarPatch::control() {
     if (al::isInWaterPos(this, al::getTrans(this)) && !al::isNerve(this, &NrvRadiconCarPatch.HackBreak) && !al::isNerve(this, &NrvRadiconCarPatch.HackReset)) {

@@ -11,7 +11,7 @@
 #include "hk/svc/types.h"
 #include "hk/util/Algorithm.h"
 #include "hk/util/Context.h"
-#include "hk/util/FixedCapacityArray.h"
+#include "hk/util/FixedVec.h"
 #include "hk/util/hash.h"
 #include <cstdio>
 #include <sead/prim/seadEndian.h>
@@ -106,7 +106,7 @@ namespace pe {
 
     constexpr size cMaxPatches = 0x1000;
 
-    static hk::util::FixedCapacityArray<FileAlignmentEntry, cMaxPatches> sFileAlignmentTable;
+    static hk::util::FixedVec<FileAlignmentEntry, cMaxPatches> sFileAlignmentTable;
 
     struct PatchingProgress {
         u32 numPatched = 0;
