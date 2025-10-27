@@ -81,7 +81,7 @@ namespace pe {
 #define ZSTD 1
 
 #define COMPRESSION YAZ0
-#define CACHE_DIR "sd:/WuhuKingdom/cache/"
+#define CACHE_DIR "sd:/smo/WuhuKingdom/cache/"
 #define ROMFS_MOUNT "content:"
 
     constexpr char cBaseRomFsMount[] = ROMFS_MOUNT;
