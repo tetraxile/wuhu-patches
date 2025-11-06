@@ -36,20 +36,20 @@ $radicon_car_ZN4sead8Matrix34IfE5identE = 0x00f4e4e8
 _ZN12_GLOBAL__N_17NrvWaitE = 0x01d657a0
 _ZN12_GLOBAL__N_111NrvMoveAutoE = 0x01d657a8
 
-// @smo:101
-// 
-// _ZN12_GLOBAL__N_17NrvWaitE =
-// _ZN12_GLOBAL__N_111NrvMoveAutoE =
-// 
-// @smo:110
-// 
-// _ZN12_GLOBAL__N_17NrvWaitE =
-// _ZN12_GLOBAL__N_111NrvMoveAutoE =
-// 
-// @smo:120
-// 
-// _ZN12_GLOBAL__N_17NrvWaitE =
-// _ZN12_GLOBAL__N_111NrvMoveAutoE =
+@smo:101
+
+_ZN12_GLOBAL__N_17NrvWaitE = 0x01d677d0
+_ZN12_GLOBAL__N_111NrvMoveAutoE = 0x01d677d8
+
+@smo:110
+
+_ZN12_GLOBAL__N_17NrvWaitE = 0x01d687d0
+_ZN12_GLOBAL__N_111NrvMoveAutoE = 0x01d687d8
+
+@smo:120
+
+_ZN12_GLOBAL__N_17NrvWaitE = 0x01e118c0
+_ZN12_GLOBAL__N_111NrvMoveAutoE = 0x1e118c8
 
 @smo:130
 
