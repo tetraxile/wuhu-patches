@@ -1,4 +1,5 @@
 #include "hk/hook/InstrUtil.h"
+#include "hk/hook/a64/Assembler.h"
 
 #include <cstring>
 #include <nn/fs.h>
@@ -7,8 +8,6 @@
 #include <sead/heap/seadExpHeap.h>
 #include <sead/heap/seadHeapMgr.h>
 
-#include "hk/types.h"
-#include "hk/util/hash.h"
 #include "pe/Hacks/FSHacks.h"
 
 extern "C" void _ZN15RadiconCarPatchC1EPP14IUsePlayerHack();
@@ -25,4 +24,7 @@ extern "C" void hkMain() {
     pe::installFSHacks();
 
     hk::hook::writeBranchLinkAtSym<"$radicon_car_ctor_bl">(_ZN15RadiconCarPatchC1EPP14IUsePlayerHack);
+
+    if (!hk::ro::getMainModule()->isVersion("100"))
+        hk::hook::a64::assemble<"nop">().installAtSym<"$quest_moon_workaround">();
 }
