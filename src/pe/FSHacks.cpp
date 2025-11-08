@@ -335,14 +335,11 @@ namespace pe {
     static void createDirectoryRecursively(const char* dirPath) {
         PathStr path(dirPath);
 
-        while (!directoryExists(path.cstr())) {
-            auto parent = getParentPath(path.cstr());
-            if (directoryExists(parent.cstr())) {
-                nn::fs::CreateDirectory(path.cstr());
-                createDirectoryRecursively(dirPath);
-            }
-            path = parent;
-        }
+        if (path.endsWith(":")) // don't try to create filesystem root
+            return;
+
+        createDirectoryRecursively(getParentPath(path.cstr()).cstr());
+        nn::fs::CreateDirectory(path.cstr());
     }
 
     template <typename Func>
