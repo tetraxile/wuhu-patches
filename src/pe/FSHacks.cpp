@@ -161,7 +161,7 @@ namespace pe {
                 }();
 
                 if (cacheExists) {
-                    hk::diag::debugLog("Load cached %s %s", arg.path.cstr(), decompressedPath.cstr());
+                    hk::diag::logLine("Load cached %s %s", arg.path.cstr(), decompressedPath.cstr());
                     auto decompressedArg = arg;
                     decompressedArg.path = decompressedPath;
                     return thisPtr->tryLoadWithoutDecomp(decompressedArg);
@@ -398,7 +398,7 @@ namespace pe {
             } else // normal
                 outPath->removeSuffix(cCompressionExt);
 
-            hk::diag::debugLog("Patching %s with %s to %s", originalPath->cstr(), path.cstr(), outPath->cstr());
+            hk::diag::logLine("Patching %s with %s to %s", originalPath->cstr(), path.cstr(), outPath->cstr());
             createDirectoryRecursively(getParentPath(outPath->cstr()).cstr());
             patchFile(path.cstr(), originalPath->cstr(), outPath->cstr());
 
@@ -440,7 +440,7 @@ namespace pe {
         s64 size = 0;
         HK_ABORT_UNLESS_R(nn::fs::GetFileSize(&size, hashFile).GetInnerValueForDebug());
         if (size < sizeof(u32) * 2) {
-            hk::diag::debugLog("Patch hash file size too small: %zu", size);
+            hk::diag::logLine("Patch hash file size too small: %zu", size);
             nn::fs::CloseFile(hashFile);
             return 0;
         }
@@ -451,7 +451,7 @@ namespace pe {
 
         const u32 expectedSize = sizeof(u32) * 2 + tableSize * sizeof(FileAlignmentEntry);
         if (size != expectedSize) {
-            hk::diag::debugLog("Patch hash file size mismatch: expected %zu, got %zu", expectedSize, size);
+            hk::diag::logLine("Patch hash file size mismatch: expected %zu, got %zu", expectedSize, size);
             nn::fs::CloseFile(hashFile);
             return 0;
         }
@@ -499,6 +499,14 @@ namespace pe {
     extern "C" void progressBarSetProgressPtrSignal(PatchingProgress*);
 
     static void initProgressBar() {
+        PathStrFormat path = PathStrFormat("sd:/atmosphere/contents/%016lX/", cProgressBarProgram);
+        if (!directoryExists(path.cstr())) {
+            hk::diag::logLine("no progress bar program at \"%s\", not showing", path.cstr());
+
+            sProgressBarExists = false;
+            return;
+        }
+
         hk::svc::Handle serviceHandle;
         HK_ABORT_UNLESS_R(nn::sm::GetServiceHandle(cast<nn::svc::Handle*>(&serviceHandle), "pm:shell", 8));
         serviceCreate(&g_pmshellSrv, serviceHandle);
@@ -533,15 +541,15 @@ namespace pe {
         nn::fs::CreateDirectory(getParentPath(cCacheDir).cstr());
         {
             sead::ScopedCurrentHeapSetter setter(sPatchHeap);
-            hk::diag::debugLog("Applying RomFS patches with %.2fMB heap", sPatchHeap->getFreeSize() / 1024.f / 1024);
+            hk::diag::logLine("Applying RomFS patches with %.2fMB heap", sPatchHeap->getFreeSize() / 1024.f / 1024);
 
             const u32 patchesHash = calcPatchesHash(cBaseRomFsMount, cBaseRomFsMount);
-            hk::diag::debugLog("Patches Hash: %08x", patchesHash);
+            hk::diag::logLine("Patches Hash: %08x", patchesHash);
 
             const u32 cachedPatchesHash = readPatchesHash();
             bool needsPatch = cachedPatchesHash != patchesHash;
 
-            hk::diag::debugLog("Cached Patches Hash: %08x", cachedPatchesHash);
+            hk::diag::logLine("Cached Patches Hash: %08x", cachedPatchesHash);
             openFileHook.uninstall();
             if (needsPatch) {
                 initProgressBar();
