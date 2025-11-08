@@ -502,6 +502,14 @@ namespace pe {
     extern "C" void progressBarSetProgressPtrSignal(PatchingProgress*);
 
     static void initProgressBar() {
+        PathStrFormat path = PathStrFormat("sd:/atmosphere/contents/%016lX/", cProgressBarProgram);
+        if (!directoryExists(path.cstr())) {
+            hk::diag::logLine("no progress bar program at \"%s\", not showing", path.cstr());
+
+            sProgressBarExists = false;
+            return;
+        }
+
         hk::svc::Handle serviceHandle;
         HK_ABORT_UNLESS_R(nn::sm::GetServiceHandle(cast<nn::svc::Handle*>(&serviceHandle), "pm:shell", 8));
         serviceCreate(&g_pmshellSrv, serviceHandle);
