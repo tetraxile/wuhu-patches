@@ -3,6 +3,7 @@
 $heap_create_hook = _ZN4sead13GameFramework10initializeERKNS_9Framework13InitializeArgE + 0x1c4
 $resource_load_archive_hook = _ZN2al8ResourceC1ERKN4sead14SafeStringBaseIcEE + 0x144
 $radicon_car_ctor_bl = _ZN10RadiconNpc4initERKN2al13ActorInitInfoE + 0x208
+$is_world_skies_scenario_1 = 0x30c4b4
 
 @smo:101,110,120
 
@@ -14,3 +15,4 @@ $heap_create_hook = 0x00943884
 $resource_load_archive_hook = 0x00746160
 $radicon_car_ctor_bl = 0x0036b418
 $quest_moon_workaround = 0x004c84ec
+$is_world_skies_scenario_1 = 0x2cc660

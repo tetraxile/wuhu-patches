@@ -1,7 +1,11 @@
 @smo:100,101,110,120
 
 _ZN16GameDataFunction17getCurrentWorldIdE22GameDataHolderAccessor
+_ZN16GameDataFunction11isWorldSandE22GameDataHolderAccessor
+_ZN16GameDataFunction13getScenarioNoEPKN2al9LiveActorE
 
 @smo:130
 
 _ZN16GameDataFunction17getCurrentWorldIdE22GameDataHolderAccessor = 0x4d2de0
+_ZN16GameDataFunction11isWorldSandE22GameDataHolderAccessor = 0x4d8330
+_ZN16GameDataFunction13getScenarioNoEPKN2al9LiveActorE = 0x4d3490
