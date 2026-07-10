@@ -1,0 +1,7 @@
+@smo:100,101,110,120
+
+_ZN16GameDataFunction17getCurrentWorldIdE22GameDataHolderAccessor
+
+@smo:130
+
+_ZN16GameDataFunction17getCurrentWorldIdE22GameDataHolderAccessor = 0x4d2de0

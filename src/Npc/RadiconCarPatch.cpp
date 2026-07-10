@@ -11,7 +11,7 @@
 #include <al/Library/Nerve/NerveUtil.h>
 
 #include "game/Enemy/EnemyStateReset.h"
-#include "game/Util/Hack.h"
+#include "game/Util/PlayerHackFunction.h"
 
 namespace {
     NERVE_IMPL(RadiconCar, Wait);
