@@ -3,22 +3,23 @@
 #include "hk/hook/Trampoline.h"
 #include "hk/hook/a64/Assembler.h"
 
+#include <cstdio>
 #include <cstring>
 #include <nn/fs.h>
 
 #include <agl/common/aglDrawContext.h>
+#include <sead/filedevice/nin/seadNinSaveFileDeviceNin.h>
+#include <sead/filedevice/seadFileDevice.h>
 #include <sead/heap/seadExpHeap.h>
 #include <sead/heap/seadHeapMgr.h>
-#include <sead/filedevice/seadFileDevice.h>
-#include <sead/filedevice/nin/seadNinSaveFileDeviceNin.h>
 
-#include "Library/Nerve/NerveUtil.h"
 #include "Library/Base/StringUtil.h"
+#include "Library/Nerve/NerveUtil.h"
 
+#include "MapObj/CapMessageShowInfo.h"
+#include "MapObj/ShineTowerRocket.h"
 #include "Scene/StageSceneStateWorldMap.h"
 #include "System/GameDataFunction.h"
-#include "MapObj/ShineTowerRocket.h"
-#include "MapObj/CapMessageShowInfo.h"
 
 #include "pe/Hacks/FSHacks.h"
 
@@ -44,8 +45,9 @@ bool isWorldSkiesScenario1(al::LiveActor* actor) {
     return GameDataFunction::getCurrentWorldId(actor) == WuhuSkiesWorldId && GameDataFunction::getScenarioNo(actor) == 1;
 }
 
-HkReplace<void, ShineTowerRocket*> exeNoStartEarth = [](ShineTowerRocket *self) -> void {
-    if (!al::isFirstStep(self)) return;
+HkReplace<void, ShineTowerRocket*> exeNoStartEarth = [](ShineTowerRocket* self) -> void {
+    if (!al::isFirstStep(self))
+        return;
 
     GameDataHolderAccessor accessor(self);
     if (isWorldSkiesScenario1(self)) {
@@ -53,24 +55,64 @@ HkReplace<void, ShineTowerRocket*> exeNoStartEarth = [](ShineTowerRocket *self) 
     }
 };
 
-HkTrampoline saveWriteHook = [](TrampolineStatic(), void* thisPtr, sead::FileDevice* device, const char* name) -> s32 {
+void getUsername(hk::FixedString<0x20>* out) {
+    char username[0x20] = "default";
+
+    nn::account::Uid uid;
+    nn::account::Nickname nickname;
+    if (nn::account::GetLastOpenedUser(&uid).IsSuccess() && nn::account::GetNickname(&nickname, uid).IsSuccess()) {
+        strncpy(username, nickname.m_Buffer, sizeof(username));
+    }
+
+    for (s32 i = 0; i < sizeof(username); i++) {
+        const char* disallowedChars = "<>*?:|/\\";
+        for (s32 j = 0; j < strlen(disallowedChars); j++)
+            if (username[i] == disallowedChars[j])
+                username[i] = '_';
+    }
+
+    *out = username;
+}
+
+HkTrampoline saveWriteHook = [](TrampolineStatic(), void* thisPtr, sead::FileDevice* device, const char* filename) -> s32 {
+    hk::FixedString<0x20> username;
+    getUsername(&username);
+
+    hk::FixedString<0x40> sdDirPath("sd:/smo/WuhuKingdom/save/");
+    sdDirPath.append(username.cstr());
+    sdDirPath.append("/");
+
+    hk::FixedString<0x40> path("smo/WuhuKingdom/save/");
+    path.append(username.cstr());
+    path.append("/");
+    path.append(filename);
+
+    hk::FixedString<0x40> sdPath("sd:/");
+    sdPath.append(path.cstr());
+
     nn::fs::DirectoryEntryType type;
-    if (nn::fs::GetEntryType(&type, "sd:/smo/WuhuKingdom/save").IsFailure() || type != nn::fs::DirectoryEntryType_Directory) {
+    if (nn::fs::GetEntryType(&type, sdDirPath).IsFailure() || type != nn::fs::DirectoryEntryType_Directory) {
         nn::fs::CreateDirectory("sd:/smo/");
         nn::fs::CreateDirectory("sd:/smo/WuhuKingdom/");
         nn::fs::CreateDirectory("sd:/smo/WuhuKingdom/save/");
+        nn::fs::CreateDirectory(sdDirPath.cstr());
     }
-    hk::FixedString<50> newPath("smo/WuhuKingdom/save/");
-    newPath.append(name);
+
     sead::NinSaveFileDevice newDevice("sd");
-    return orig(thisPtr, &newDevice, newPath.cstr());
+    return orig(thisPtr, &newDevice, path.cstr());
 };
 
 HkTrampoline saveReadHook = [](TrampolineStatic(), void* thisPtr, sead::FileDevice* device, const char* name, void* flags) -> s32 {
-    hk::FixedString<50> newPath("smo/WuhuKingdom/save/");
-    newPath.append(name);
+    hk::FixedString<0x20> username;
+    getUsername(&username);
+
+    hk::FixedString<0x40> path("smo/WuhuKingdom/save/");
+    path.append(username.cstr());
+    path.append("/");
+    path.append(name);
+
     sead::NinSaveFileDevice newDevice("sd");
-    return orig(thisPtr, &newDevice, newPath.cstr(), flags);
+    return orig(thisPtr, &newDevice, path.cstr(), flags);
 };
 
 extern "C" void hkMain() {
@@ -84,7 +126,7 @@ extern "C" void hkMain() {
         hk::hook::a64::assemble<"nop">().installAtSym<"$quest_moon_workaround">();
 
     worldMapAppear.installAtSym<"_ZN23StageSceneStateWorldMap6appearEv">();
-    
+
     exeNoStartEarth.installAtSym<"_ZN16ShineTowerRocket15exeNoStartEarthEv">();
     hk::hook::writeBranchAtSym<"$is_world_skies_scenario_1">(isWorldSkiesScenario1);
 

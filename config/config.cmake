@@ -3,7 +3,7 @@ set(LLDFLAGS --no-demangle --gc-sections)
 
 set(OPTIMIZE_OPTIONS_DEBUG -O0 -gdwarf-4)
 set(OPTIMIZE_OPTIONS_RELEASE -O3 -ffast-math -flto)
-set(WARN_OPTIONS -Werror=return-type -Wno-invalid-offsetof)
+set(WARN_OPTIONS -Werror=return-type -Wno-unqualified-std-cast-call -Wno-deprecated-declarations -Wno-main -Wno-invalid-offsetof)
 
 set(INCLUDES include include/agl)
 
