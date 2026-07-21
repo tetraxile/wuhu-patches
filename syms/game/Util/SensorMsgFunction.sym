@@ -1,0 +1,9 @@
+@smo:100,101,110,120
+
+_ZN2rs20sendMsgRadishReflectEPN2al9HitSensorES2_
+_ZN2rs19sendMsgRadishAttackEPN2al9HitSensorES2_
+
+@smo:130
+
+_ZN2rs20sendMsgRadishReflectEPN2al9HitSensorES2_ = 0x5228a0
+_ZN2rs19sendMsgRadishAttackEPN2al9HitSensorES2_ = 0x522860

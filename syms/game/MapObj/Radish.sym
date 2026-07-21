@@ -1,0 +1,9 @@
+@smo:100,101,110,120
+
+_ZN6Radish8exeThrowEv
+_ZN6Radish8exeBoundEv
+
+@smo:130
+
+_ZN6Radish8exeThrowEv = 0x2edf0c
+_ZN6Radish8exeBoundEv = 0x2b2940

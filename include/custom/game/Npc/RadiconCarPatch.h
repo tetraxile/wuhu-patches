@@ -2,10 +2,10 @@
 
 #include <math/seadMatrix.h>
 
-#include <al/Library/LiveActor/LiveActor.h>
+#include <Library/LiveActor/LiveActor.h>
 
 namespace al {
-class JointSpringControllerHolder;
+    class JointSpringControllerHolder;
 }
 
 class RadiconCarStateAutoMove;
@@ -16,11 +16,11 @@ class RadiconCar : public al::LiveActor {
 public:
     RadiconCar(IUsePlayerHack** hackActor);
 
-    void init(const al::ActorInitInfo &info) override;
+    void init(const al::ActorInitInfo& info) override;
     void initAfterPlacement() override;
     void makeActorAlive() override;
-    void attackSensor(al::HitSensor *self, al::HitSensor *other) override;
-    bool receiveMsg(const al::SensorMsg *message, al::HitSensor *other, al::HitSensor *self) override;
+    void attackSensor(al::HitSensor* self, al::HitSensor* other) override;
+    bool receiveMsg(const al::SensorMsg* message, al::HitSensor* other, al::HitSensor* self) override;
 
     void tryCancelHack() const;
 

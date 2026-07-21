@@ -1,0 +1,11 @@
+@smo:100,101,110,120
+
+_ZNK16GameProgressData33calcNextLockedWorldNumForWorldMapEv
+_ZNK16GameProgressData32calcNextLockedWorldIdForWorldMapEi
+_ZNK16GameProgressData17getUnlockWorldNumEv
+
+@smo:130
+
+_ZNK16GameProgressData33calcNextLockedWorldNumForWorldMapEv = 0x4e0f00
+_ZNK16GameProgressData32calcNextLockedWorldIdForWorldMapEi = 0x4e0f20
+_ZNK16GameProgressData17getUnlockWorldNumEv = 0x4e0ed0

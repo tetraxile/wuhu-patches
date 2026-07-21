@@ -1,0 +1,9 @@
+@smo:100,101,110,120
+
+_ZN2al10emitEffectEPNS_16IUseEffectKeeperEPKcPKN4sead7Vector3IfEE
+_ZN2al21setEffectFollowMtxPtrEPNS_16IUseEffectKeeperEPKcPKN4sead8Matrix34IfEE
+
+@smo:130
+
+_ZN2al10emitEffectEPNS_16IUseEffectKeeperEPKcPKN4sead7Vector3IfEE = 0x603be0
+_ZN2al21setEffectFollowMtxPtrEPNS_16IUseEffectKeeperEPKcPKN4sead8Matrix34IfEE = 0x604070

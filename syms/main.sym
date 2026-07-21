@@ -3,7 +3,8 @@
 $heap_create_hook = _ZN4sead13GameFramework10initializeERKNS_9Framework13InitializeArgE + 0x1c4
 $resource_load_archive_hook = _ZN2al8ResourceC1ERKN4sead14SafeStringBaseIcEE + 0x144
 $radicon_car_ctor_bl = _ZN10RadiconNpc4initERKN2al13ActorInitInfoE + 0x208
-$is_world_skies_scenario_1 = 0x30c4b4
+$skies_scenario_1_disallow_globe = 0x30c4b4
+$water_motorcycle = _ZN10Motorcycle8movementEv + 0xbac
 
 @smo:101,110,120
 
@@ -11,8 +12,38 @@ $quest_moon_workaround = _ZN12GameDataFile10startStageEPKci + 0x718
 
 @smo:130
 
-$heap_create_hook = 0x00943884
-$resource_load_archive_hook = 0x00746160
-$radicon_car_ctor_bl = 0x0036b418
-$quest_moon_workaround = 0x004c84ec
-$is_world_skies_scenario_1 = 0x2cc660
+$heap_create_hook = 0x943884
+$resource_load_archive_hook = 0x0746160
+$radicon_car_ctor_bl = 0x36b418
+$quest_moon_workaround = 0x4c84ec
+$skies_scenario_1_disallow_globe = 0x2cc660
+$water_motorcycle = 0x290644
+
+@smo:100,101,110,120,130
+
+$sphinx_object_camera = _ZN10SphinxQuiz4initERKN2al13ActorInitInfoE + 0x120
+
+@smo:100
+
+$radish_exe_bound = 0x1d22b98
+$radish_exe_land = 0x1d22b90
+
+@smo:101
+
+$radish_exe_bound = 0x1d24bc8
+$radish_exe_land = 0x1d24bc0
+
+@smo:110
+
+$radish_exe_bound = 0x1d25bc8
+$radish_exe_land = 0x1d25bc0
+
+@smo:120
+
+$radish_exe_bound = 0x1dc9668
+$radish_exe_land = 0x1dc9660
+
+@smo:130
+
+$radish_exe_bound = 0x1264d70
+$radish_exe_land = 0x1264d68

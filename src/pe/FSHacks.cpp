@@ -1,8 +1,7 @@
 #include "pe/Hacks/FSHacks.h"
 #include "flips/libbps.h"
-#include "heap/seadExpHeap.h"
-#include "heap/seadHeapMgr.h"
 #include "hk/Result.h"
+#include "hk/container/FixedVec.h"
 #include "hk/diag/diag.h"
 #include "hk/hook/InstrUtil.h"
 #include "hk/hook/Trampoline.h"
@@ -11,19 +10,22 @@
 #include "hk/svc/types.h"
 #include "hk/util/Algorithm.h"
 #include "hk/util/Context.h"
-#include "hk/container/FixedVec.h"
 #include "hk/util/hash.h"
 #include <cstdio>
-#include <sead/prim/seadEndian.h>
-#include <sead/resource/seadResourceMgr.h>
 
 #include "libnx/ncm_types.h"
 #include "libnx/pm.h"
-#include "nn/fs.h"
 
-#include "al/Library/Base/StringUtil.h"
-#include "al/Library/File/FileUtil.h"
+#include <nn/fs.h>
+
+#include <sead/heap/seadExpHeap.h>
+#include <sead/heap/seadHeapMgr.h>
+#include <sead/prim/seadEndian.h>
 #include <sead/resource/seadArchiveRes.h>
+#include <sead/resource/seadResourceMgr.h>
+
+#include "Library/Base/StringUtil.h"
+#include "Library/File/FileUtil.h"
 
 #include "libnx/service.h"
 
@@ -423,8 +425,8 @@ namespace pe {
 
         nn::fs::FileHandle handle;
         HK_ABORT_UNLESS_R(nn::fs::OpenFile(&handle, cCacheHashFile, nn::fs::OpenMode_Write).GetInnerValueForDebug());
-        HK_ABORT_UNLESS_R(nn::fs::WriteFile(handle, 0, &hash, sizeof(hash), {}).GetInnerValueForDebug());
-        HK_ABORT_UNLESS_R(nn::fs::WriteFile(handle, sizeof(hash), &tableSize, sizeof(tableSize), {}).GetInnerValueForDebug());
+        HK_ABORT_UNLESS_R(nn::fs::WriteFile(handle, 0, &hash, sizeof(hash), { }).GetInnerValueForDebug());
+        HK_ABORT_UNLESS_R(nn::fs::WriteFile(handle, sizeof(hash), &tableSize, sizeof(tableSize), { }).GetInnerValueForDebug());
         for (u32 i = 0; i < tableSize; i++) {
             const auto& entry = sFileAlignmentTable[i];
             HK_ABORT_UNLESS_R(nn::fs::WriteFile(handle, sizeof(hash) + sizeof(tableSize) + sizeof(entry) * i, &entry, sizeof(entry), nn::fs::WriteOption::CreateOption(nn::fs::WriteOptionFlag_Flush)).GetInnerValueForDebug());

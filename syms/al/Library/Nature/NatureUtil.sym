@@ -2,8 +2,27 @@
 
 _ZN2al12isInWaterPosEPKNS_9LiveActorERKN4sead7Vector3IfEE
 _ZN2al17tryAddRippleLargeEPKNS_9LiveActorE
+_ZN2al18tryAddRippleMiddleEPKNS_9LiveActorE
+
+@smo:100
+
+_ZN2al20calcFindFluidSurfaceEPN4sead7Vector3IfEES3_PKNS_9LiveActorERKS2_S8_PKcbbf = 0x957a58
+
+@smo:101
+
+_ZN2al20calcFindFluidSurfaceEPN4sead7Vector3IfEES3_PKNS_9LiveActorERKS2_S8_PKcbbf = 0x959084
+
+@smo:110
+
+_ZN2al20calcFindFluidSurfaceEPN4sead7Vector3IfEES3_PKNS_9LiveActorERKS2_S8_PKcbbf = 0x9596c8
+
+@smo:120
+
+_ZN2al20calcFindFluidSurfaceEPN4sead7Vector3IfEES3_PKNS_9LiveActorERKS2_S8_PKcbbf = 0x9992c0
 
 @smo:130
 
-_ZN2al12isInWaterPosEPKNS_9LiveActorERKN4sead7Vector3IfEE = 0x006c58b0
-_ZN2al17tryAddRippleLargeEPKNS_9LiveActorE = 0x006c61f0
+_ZN2al12isInWaterPosEPKNS_9LiveActorERKN4sead7Vector3IfEE = 0x6c58b0
+_ZN2al17tryAddRippleLargeEPKNS_9LiveActorE = 0x6c61f0
+_ZN2al18tryAddRippleMiddleEPKNS_9LiveActorE = 0x6c6160
+_ZN2al20calcFindFluidSurfaceEPN4sead7Vector3IfEES3_PKNS_9LiveActorERKS2_S8_PKcbbf = 0x6c5c80

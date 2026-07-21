@@ -1,17 +1,17 @@
-#include "game/Npc/RadiconCarPatch.h"
+#include "Npc/RadiconCarPatch.h"
 
-#include <al/Library/LiveActor/ActorActionFunction.h>
-#include <al/Library/LiveActor/ActorClippingFunction.h>
-#include <al/Library/LiveActor/ActorModelFunction.h>
-#include <al/Library/LiveActor/ActorMovementFunction.h>
-#include <al/Library/LiveActor/ActorPoseUtil.h>
-#include <al/Library/LiveActor/ActorSensorUtil.h>
-#include <al/Library/Nature/NatureUtil.h>
-#include <al/Library/Nerve/NerveSetupUtil.h>
-#include <al/Library/Nerve/NerveUtil.h>
+#include <Library/LiveActor/ActorActionFunction.h>
+#include <Library/LiveActor/ActorClippingFunction.h>
+#include <Library/LiveActor/ActorModelFunction.h>
+#include <Library/LiveActor/ActorMovementFunction.h>
+#include <Library/LiveActor/ActorPoseUtil.h>
+#include <Library/LiveActor/ActorSensorUtil.h>
+#include <Library/Nature/NatureUtil.h>
+#include <Library/Nerve/NerveSetupUtil.h>
+#include <Library/Nerve/NerveUtil.h>
 
-#include "game/Enemy/EnemyStateReset.h"
-#include "game/Util/PlayerHackFunction.h"
+#include "Enemy/EnemyStateReset.h"
+#include "Util/PlayerHackFunction.h"
 
 namespace {
     NERVE_IMPL(RadiconCar, Wait);

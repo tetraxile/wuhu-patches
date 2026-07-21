@@ -2,8 +2,10 @@
 
 _ZN2al18validateHitSensorsEPNS_9LiveActorE
 _ZN2al20invalidateHitSensorsEPNS_9LiveActorE
+_ZN2al12getHitSensorEPKNS_9LiveActorEPKc
 
 @smo:130
 
 _ZN2al18validateHitSensorsEPNS_9LiveActorE = 0x00670470
 _ZN2al20invalidateHitSensorsEPNS_9LiveActorE = 0x00670490
+_ZN2al12getHitSensorEPKNS_9LiveActorEPKc = 0x66f560
