@@ -272,11 +272,11 @@ extern "C" void hkMain() {
     anagramAlphabetCharacterInit.installAtPtr(&AnagramAlphabetCharacter::init);
 
     // stop bowser capture from overriding the camera
-    hk::hook::a64::assemble<"mov w0, #1">().installAtMainOffset(0x7de58);
-    hk::hook::a64::assemble<"nop\nnop">().installAtMainOffset(0x7de80);
-    hk::hook::a64::assemble<"nop">().installAtMainOffset(0x7ee94);
-    hk::hook::a64::assemble<"nop">().installAtMainOffset(0x7eeac);
-    hk::hook::a64::assemble<"nop">().installAtMainOffset(0x7f3d4);
+    hk::hook::a64::assemble<"mov w0, #1">().installAtSym<"$koopa_normal_camera_1">();
+    hk::hook::a64::assemble<"nop\nnop">().installAtSym<"$koopa_normal_camera_2">();
+    hk::hook::a64::assemble<"nop">().installAtSym<"$koopa_normal_camera_3">();
+    hk::hook::a64::assemble<"nop">().installAtSym<"$koopa_normal_camera_4">();
+    hk::hook::a64::assemble<"nop">().installAtSym<"$koopa_normal_camera_5">();
 
     // allow CameraParam.byml to be used for SphinxQuiz
     hk::hook::writeBranchLinkAtSym<"$sphinx_object_camera">(rs::initEventCameraObject);
